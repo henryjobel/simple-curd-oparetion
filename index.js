@@ -2,7 +2,7 @@ const express = require('express')
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 // jhobelsaha
@@ -30,6 +30,12 @@ async function run() {
     await client.connect();
     const database = client.db("userDB");
     const userCollection = database.collection("users");
+    
+    app.get('/user', async (req, res) => {
+        const cursor = userCollection.find()
+        const result = await cursor.toArray();
+        res.send(result)
+      })
 
     app.post('/user', async (req, res) => {
         const user = req.body;
@@ -37,6 +43,13 @@ async function run() {
         const result = await userCollection.insertOne(user)
         res.send(result)
 
+      })
+      app.delete('/user/:id', async (req, res) => {
+        const id =req.params.id;
+        console.log("plz id delete fron database",id)
+        const query = {_id: new ObjectId(id)}
+        const result = await userCollection.deleteOne(query)
+        res.send(result)
       })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
